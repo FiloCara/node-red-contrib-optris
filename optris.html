@@ -1,0 +1,53 @@
+<script type="text/javascript">
+    RED.nodes.registerType('optrisnode',{
+        category: 'optris',
+        color: '#FFFFFF',
+        defaults: {
+            name: {value:""},
+            dllPath: {
+                value:"", 
+                required: true
+            },
+            configPath: {
+                value:"", 
+                required: true
+            },
+            imageType: {
+                value:"",
+                required: true
+            }
+        },
+        inputs:1,
+        outputs:1,
+        // icon: "./icons/opencv-node-red-logo.png",
+        label: function() {
+            return this.name||"optrisnode";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="optrisnode">
+    <div class="form-row">
+        <label for="node-input-dllPath"><i class=""fa fa-file""></i> Libirimager DLL path</label>
+        <input type="text" id="node-input-device" placeholder="dllPath">
+    </div>
+    <div class="form-row">
+        <label for="node-input-configPath"><i class=""fa fa-file""></i> Config file path</label>
+        <input type="text" id="node-input-device" placeholder="configPath">
+    </div>
+    <div class="form-row">
+        <label for="node-input-imageType"><i class="fa fa-picture-o"></i> Output</label>
+        <select id="node-input-imageType" style="width:60%; margin-right:5px;">
+            <option value="palette">Palette Image</option>
+            <option value="thermal">Thermal Image</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="optrisnode">
+    
+</script>
