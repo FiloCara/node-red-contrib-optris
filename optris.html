@@ -1,7 +1,7 @@
 <script type="text/javascript">
-    RED.nodes.registerType('optrisnode',{
+    RED.nodes.registerType('optris',{
         category: 'optris',
-        color: '#FFFFFF',
+        color: '#E9967A',
         defaults: {
             name: {value:""},
             dllPath: {
@@ -12,6 +12,10 @@
                 value:"", 
                 required: true
             },
+            formatPath: {
+                value:"", 
+                required: true
+            },
             imageType: {
                 value:"",
                 required: true
@@ -19,21 +23,28 @@
         },
         inputs:1,
         outputs:1,
-        // icon: "./icons/opencv-node-red-logo.png",
+        icon: "font-awesome/fa-video-camera",
         label: function() {
             return this.name||"optrisnode";
         }
     });
 </script>
 
-<script type="text/x-red" data-template-name="optrisnode">
+<script type="text/x-red" data-template-name="optris">
+    <h4>Libirimager DLL path</h4>
     <div class="form-row">
-        <label for="node-input-dllPath"><i class=""fa fa-file""></i> Libirimager DLL path</label>
-        <input type="text" id="node-input-device" placeholder="dllPath">
+        <label for="node-input-dllPath"><i class=""fa fa-file""></i>DLL path</label>
+        <input type="text" id="node-input-dllPath" placeholder="dllPath">
     </div>
+    <h4>Optris Camera Config file</h4>
     <div class="form-row">
-        <label for="node-input-configPath"><i class=""fa fa-file""></i> Config file path</label>
-        <input type="text" id="node-input-device" placeholder="configPath">
+        <label for="node-input-configPath"><i class=""fa fa-file""></i>Config path</label>
+        <input type="text" id="node-input-configPath" placeholder="configPath">
+    </div>
+    <h4>Formats.def file path</h4>
+    <div class="form-row">
+        <label for="node-input-formatPath"><i class=""fa fa-file""></i>Formats.def path</label>
+        <input type="text" id="node-input-formatPath" placeholder="formatPath">
     </div>
     <div class="form-row">
         <label for="node-input-imageType"><i class="fa fa-picture-o"></i> Output</label>
@@ -48,6 +59,6 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="optrisnode">
+<script type="text/x-red" data-help-name="optris">
     
 </script>
