@@ -5,7 +5,6 @@ module.exports = function(RED) {
     function OptrisNode(config) {
         RED.nodes.createNode(this, config);
         var node  = this;
-        
         node.dllPath = config.dllPath; // Path to libirimager.ddl file
         node.configPath = config.configPath; // Path to config file
         node.formatPath = config.formatPath; // Path to "Formats.def" file
@@ -13,6 +12,8 @@ module.exports = function(RED) {
         node.colorPalette = config.colorPalette;
         node.shutterMode = config.shutterMode;
         var running = false;
+        var w;
+        var h;
 
         // Try to load the DLL
         try {
@@ -39,24 +40,25 @@ module.exports = function(RED) {
                     // Initialize usb communication
                     optris.usb_init(node.configPath, node.formatPath);
                     // Set shutter mode
-                    optris.set_shutter_mode({"manual":0, "auto":1}[node.shutterMode])
+                    // console.log(optris.set_shutter_mode({"manual":0, "auto":1}[node.shutterMode]))
                     // Load palette
-                    optris.set_palette(optris.colorPalette[node.colorPalette])
+                    // console.log(optris.set_palette(optris.colorPalette[node.colorPalette]))
 
                     // Compute image sizes
-                    if (node.imageType === "thermal_image") {
-                        var w, h = optris.get_thermal_image_size();
+                    if (node.imageType === "thermal") {
+                        [w, h] = optris.get_thermal_image_size();
                     }
-                    else if (node.imageType === "palette_image") {
-                        var w, h = optris.get_palette_image_size();
+                    else if (node.imageType === "palette") {
+                        [w, h] = optris.get_palette_image_size();
                     }
                     
+                    console.log(w, h)
                     // Remove garbage images
-                    for (let i=0; i < 300; i++) {
-                        if (node.imageType === "thermal_image") {
+                    for (let i=0; i < 600; i++) {
+                        if (node.imageType === "thermal") {
                             optris.get_thermal_image(w, h);
                         }
-                        else if (node.imageType === "palette_image") {
+                        else if (node.imageType === "palette") {
                             optris.get_palette_image(w, h);
                         }
                     }
@@ -74,7 +76,7 @@ module.exports = function(RED) {
             else if (msg.hasOwnProperty('trigger') === true) {
                 if (node.shutterMode === "manual") {
                     // Reset shutter
-                    optris.trigger_shutter_flag()
+                    optris.trigger_shutter_flag();
                 }
                 else{
                     node.warn("Warning: trigger disabled with AUTO shutter mode")
@@ -93,13 +95,12 @@ module.exports = function(RED) {
 
                 try {
                     if (running) {
-                        if (node.imageType === "thermal_image") {
+                        if (node.imageType === "thermal") {
                             var frame = optris.get_thermal_image(w, h);
                         }
-                        else if (node.imageType === "palette_image") {
+                        else if (node.imageType === "palette") {
                             var frame = optris.get_palette_image(w, h);
                         }
-
                         // Prepare payload     
                         msg.payload = {"image":frame, "w":w, "h":h};
                         node.send(msg);
