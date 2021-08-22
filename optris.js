@@ -1,4 +1,15 @@
 const optris = require("node-optris")
+const png = require("fast-png")
+
+// // Function to postprocess palette image to a base64 string
+var rawBuff2PNGString = function(buff, w, h) {
+    return Buffer.from(png.encode({
+        width:w,
+        height:h,
+        data:buff,
+        channels:3
+      })).toString("base64")
+}
 
 module.exports = function(RED) {
     
@@ -26,23 +37,22 @@ module.exports = function(RED) {
 
         node.on('input', function(msg) {
 
-            // Check wether msg has more than 1 "special" attributes
+            // Check weather msg has more than 1 "special" attributes
             let msgProps = Object.keys(msg).filter(element => ["start", "stop", "trigger"].includes(element))
             if (msgProps.length > 1) {
                 throw new Error("Input message has more than 1 special attributes (start, trigger, reset), please provide only one attribute at a time")
             }
-
+            
             // If property start, then start recording
             if (msg.hasOwnProperty('start') === true) {
-                node.status({fill:"yellow",shape:"dot",text:"Connecting"});
-
+                node.status({fill:"red",shape:"yellow",text:"Connecting"})
                 try {
                     // Initialize usb communication
                     optris.usb_init(node.configPath, node.formatPath);
                     // Set shutter mode
                     // console.log(optris.set_shutter_mode({"manual":0, "auto":1}[node.shutterMode]))
-                    // Load palette
-                    // console.log(optris.set_palette(optris.colorPalette[node.colorPalette]))
+                    // Load palette (NOT WORKING)
+                    // optris.set_palette(optris.colorPalette[node.colorPalette])
 
                     // Compute image sizes
                     if (node.imageType === "thermal") {
@@ -52,7 +62,6 @@ module.exports = function(RED) {
                         [w, h] = optris.get_palette_image_size();
                     }
                     
-                    console.log(w, h)
                     // Remove garbage images
                     for (let i=0; i < 600; i++) {
                         if (node.imageType === "thermal") {
@@ -69,6 +78,9 @@ module.exports = function(RED) {
                 } catch (e) {
                     // If any error during DLL loading or USB initialisation
                     node.error(e + " (Have a look at the Node-RED log for further information)");
+                    running = false;
+                    // Make sure to terminate optris communication
+                    optris.terminate();
                     node.status({fill:"red",shape:"dot",text:"Error"});
                 }
             }
@@ -79,7 +91,7 @@ module.exports = function(RED) {
                     optris.trigger_shutter_flag();
                 }
                 else{
-                    node.warn("Warning: trigger disabled with AUTO shutter mode")
+                    node.warn("Warning: trigger disabled with AUTO shutter mode");
                 }
             }
 
@@ -100,14 +112,20 @@ module.exports = function(RED) {
                         }
                         else if (node.imageType === "palette") {
                             var frame = optris.get_palette_image(w, h);
+                            frame = rawBuff2PNGString(frame, w, h);
                         }
                         // Prepare payload     
-                        msg.payload = {"image":frame, "w":w, "h":h};
+                        msg.payload = {"image":frame, "width":w, "height":h};
                         node.send(msg);
+                    }
+                    else {
+                        // node.warn("Warning: the camera acquisition is not running, impossible to get the frame")
                     }
                 } catch (e) {
                     node.error(e);
                     running = false;
+                    // Make sure to terminate optris communication
+                    optris.terminate();
                     node.status({fill:"red",shape:"dot",text:"Error"});
                 }   
             }

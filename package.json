@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/FiloCara/node-red-contrib-optris#readme",
   "dependencies": {
-    "node-optris": "git+https://github.com/FiloCara/node-optris.git"
+    "fast-png": "^5.0.4",
+    "node-optris": "file:../node-optris"
   }
 }
